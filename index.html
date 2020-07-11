@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Learning Timer</title>
+    <link rel="icon" href="img/red-clock.png">
+    <style>
+        body {
+            margin: 0;
+        }
+        #info {
+            color: red;
+        }
+        .clock-text {
+            font-weight: bold;
+            font-size: 28px;
+        }
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        #content {
+            width: 650px;
+            margin: 0 auto;
+            background: #f0f0f0;
+            overflow: hidden;
+            height: 300px;
+            /*border-radius: 0 0 24px 24px;*/
+        }
+        .text-center{
+            text-align: center;
+        }
+        .info-text {
+            color: red;
+        }
+        #audioStopButton {
+            display: none;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            width: 150px;
+            padding: 10px 0;
+            margin: 15px auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1 class="text-center">Enter your learning duration:</h1>
+        <div class="flex-row input-box">
+            <div class="flex-column" style="width: 50px">
+                <span>Hour</span>
+                <input id="hourInput" type="number" min="0" max="23" value="0">
+            </div>
+            <div class="flex-column" style="width: 50px">
+                <span>Minute</span>
+                <input id="minuteInput" type="number" min="0" max="59" value="0">
+            </div>
+            <div class="flex-column">
+                <button id="startButton">Start</button>
+            </div>
+            <div class="flex-column">
+                <button id="audioStopButton">Stop Audio</button>
+            </div>
+        </div>
+        <div class="text-center card">
+            <p style="margin-top: 0; margin-bottom: 5px; color: #707070">Elapsed: </p>
+            <span class="clock-text" id="hourText">-</span>
+            <span class="clock-text">:</span>
+            <span class="clock-text" id="minuteText">-</span>
+            <span class="clock-text">:</span>
+            <span class="clock-text" id="secondText">-</span>
+        </div>
+        <p id="infoText" class="text-center info-text"></p>
+    </div>
+
+    <script>
+        // Prevent user from closing the tab, 
+        // User need to interact with the webpage to make it works.
+        window.addEventListener('beforeunload', function(e) {
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        var startButton = document.getElementById('startButton');
+        var audio = new Audio('audio/alarm.wav');
+        audio.volume = 0.1;
+        var audioStopButton = document.getElementById('audioStopButton');
+        var started = false;
+
+        function startTimer() {
+            var trackInMinutes = 0;
+            var second = 0;
+            var minute = 0;
+            var hour = 0;
+            var hourInput = document.getElementById('hourInput');
+            var minuteInput = document.getElementById('minuteInput');
+            var durationInMinutes = (parseInt(hourInput.value) * 60) + parseInt(minuteInput.value);
+            console.log(durationInMinutes + ' minutes');
+            var secondText = document.getElementById('secondText');
+            var minuteText = document.getElementById('minuteText');
+            var hourText = document.getElementById('hourText');
+            var infoText = document.getElementById('infoText');
+
+            if (durationInMinutes === 0) {
+                alert('Duration cannot be 0.');
+                hourInput.focus();
+                return;
+            }
+
+            started = true;
+
+            var info = 'Alarm set for ' + hourInput.value + ' hour(s) and ' 
+                        + minuteInput.value + ' minute(s).';
+            infoText.innerHTML = info;
+
+            var _interval = setInterval(function() {
+                if (trackInMinutes === durationInMinutes) {
+                    clearInterval(_interval);
+                    info = 'Finish Learning!<br>Duration: ' 
+                            + hourInput.value  
+                            + " hour(s), " 
+                            + minuteInput.value
+                            + ' minute(s).';
+                    infoText.innerHTML = info
+                    audio.play();
+                    audioStopButton.style.display = 'inline-block';
+                    setTimeout(function() {
+                        audioStopButton.style.display = 'none';
+                    }, 12000);
+                    started = false;
+                    startButton.disabled = false;
+                    return;
+                }
+                if (second === 60) {
+                    second = 0;
+                    minute += 1;
+                    trackInMinutes += 1;
+                }
+                if (minute === 60) {
+                    minute = 0;
+                    hour += 1;
+                }
+                secondText.innerHTML = second > 9 ? second : '0' + second;
+                minuteText.innerHTML = minute > 9 ? minute : '0' + minute;
+                hourText.innerHTML = hour > 9 ? hour : '0' + hour;
+                second += 1;
+            }, 1000);
+        }
+
+        startButton.addEventListener('click', function (e) {
+            startTimer();
+            if (started) startButton.disabled = true;
+        });
+        audioStopButton.addEventListener('click', function (e) {
+            audio.pause();
+            audioStopButton.style.display = 'none';
+        })
+
+    </script>
+</body>
+</html>
