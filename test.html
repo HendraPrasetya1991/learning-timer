@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Demo Timer</title>
+    <style>
+        #timer {
+            font-size: 30px;
+        }
+    </style>
 </head>
 <body>
+    <h1>Timer</h1>
     Hour: <input id="hourInput" type="number" min="0" value="0"><br>
     Minute: <input id="minuteInput" type="number" min="0" value="0"><br>
     Second: <input id="secondInput" type="number" min="0" value="0"><br>
+    <br>
     <button id="startBtn">Start</button>
     <button id="stopBtn" disabled>Stop</button>
     <button id="resetBtn">Reset</button>
-
+    <br>
+    <br>
     <div id="timer">
         <span id="hourText">HH</span>
         :
@@ -33,7 +41,7 @@
             var minuteText = document.getElementById('minuteText');
             var secondText = document.getElementById('secondText');
 
-            // var durationInSecond;
+            var durationInSecond = 0;
 
             var hour = 0;
             var minute = 0;
@@ -41,10 +49,14 @@
 
             var _interval;
 
-            var started = false;
+            var running = false;
+            var paused = false;
+
+            var alarm = new Audio('audio/alarm.wav');
+            alarm.volume = 0.1;
 
             function changeBtnState() {
-                if (started) {
+                if (running) {
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
                 } else {
@@ -57,63 +69,82 @@
                 hour = 0;
                 minute = 0;
                 second = 0;
+                running = false;
+                paused = false;
+                updateTimerText();
                 clearInterval(_interval);
+                changeBtnState();
             }
 
             function pauseTimer() {
-                started = false;
+                running = false;
+                paused = true;
                 clearInterval(_interval);
+                changeBtnState();
+            }
+
+            function tick() {
+                if (second === 0) {
+                    if (minute > 0) {
+                        second = 60;
+                        minute--;
+                    }
+                }
+                if (minute === 0) {
+                    if (hour > 0 ) {
+                        minute = 60;
+                        hour--;
+                    }
+                }
+                second--;
+                durationInSecond--;
             }
 
             function runTimer() {
                 _interval = setInterval(function() {
-                    console.log(hour, minute, second);
-                    if (second === 0) {
-                        second = 60;
-                        minute--;
-                    }
-                    if (minute === 0) {
-                        minute = 60;
-                        hour--;
-                    }
-                    if (hour = 0 && minute === 0 && second  0) {
-                        console.log('terminated');
-                    }
+                    console.log(hour, minute, second, durationInSecond, "paused:" + paused);
                     updateTimerText();
-                    second--;
+                    if (durationInSecond <= 0) {
+                        console.log('terminated');
+                        resetTimer();
+                        alarm.play();
+                        return;
+                    }
+                    tick();
                 }, 1000);
             }
 
             function startTimer() {
-                hour = parseInt(hourInput.value);
-                minute = parseInt(minuteInput.value);
-                second = parseInt(secondInput.value);
-                started = true;
+                hour = hourInput.value ? parseInt(hourInput.value) : 0;
+                minute = minuteInput.value ? parseInt(minuteInput.value) : 0;
+                second = secondInput.value ? parseInt(secondInput.value) : 0;
+                durationInSecond = (hour * 3600) + (minute * 60) + second;
+
+                if (durationInSecond <= 0) return alert('Duration 0');
+
+                running = true;
+                paused = false;
+                updateTimerText();
+                tick();
                 runTimer();
+                changeBtnState();
             }
 
             function resumeTimer() {
-                started = true;
+                running = true;
+                paused = false;
                 runTimer();
+                changeBtnState();
             }
 
             function updateTimerText() {
-                hourText.innerHTML = hour;
-                minuteText.innerHTML = minute;
-                secondText.innerHTML = second;
-            }
-
-            // not used currently
-            function calcDuration() {
-                var hour = parseInt(hourInput.value);
-                var minute = parseInt(minuteInput.value);
-                var second = parseInt(secondInput.value);
-                var durationInSecond = (hour * 3600) + (minute * 60) + second;
-                return durationInSecond;
+                hourText.innerHTML = hour > 9 ? hour : '0' + hour;
+                minuteText.innerHTML = minute > 9 ? minute : '0' + minute;
+                secondText.innerHTML = second > 9 ? second : '0' + second;
             }
 
             startBtn.addEventListener('click', function(e) {
-                if (started) {
+                if (paused) {
                     resumeTimer();
                 } else {
                     startTimer();
@@ -125,9 +156,10 @@
                 changeBtnState();
             });
             resetBtn.addEventListener('click', function(e) {
-                started = false;
+                running = false;
                 resetTimer();
                 changeBtnState();
+                alarm.pause();
             });
 
         })(window, document);

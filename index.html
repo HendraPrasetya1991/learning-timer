@@ -2,169 +2,173 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Learning Timer</title>
-    <link rel="icon" href="img/red-clock.png">
+    <title>Timer</title>
+    <link rel="icon" href="img/blue-clock.png">
     <style>
-        body {
-            margin: 0;
-        }
-        #info {
-            color: red;
-        }
-        .clock-text {
-            font-weight: bold;
-            font-size: 28px;
-        }
-        .flex-row {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-        }
-        .flex-column {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
-        #content {
-            width: 650px;
-            margin: 0 auto;
-            background: #f0f0f0;
-            overflow: hidden;
-            height: 300px;
-            /*border-radius: 0 0 24px 24px;*/
-        }
-        .text-center{
-            text-align: center;
-        }
-        .info-text {
-            color: red;
-        }
-        #audioStopButton {
-            display: none;
-            margin: 0 auto;
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            width: 150px;
-            padding: 10px 0;
-            margin: 15px auto;
+        #timer {
+            font-size: 30px;
         }
     </style>
 </head>
 <body>
-    <div id="content">
-        <h1 class="text-center">Enter your learning duration:</h1>
-        <div class="flex-row input-box">
-            <div class="flex-column" style="width: 50px">
-                <span>Hour</span>
-                <input id="hourInput" type="number" min="0" max="23" value="0">
-            </div>
-            <div class="flex-column" style="width: 50px">
-                <span>Minute</span>
-                <input id="minuteInput" type="number" min="0" max="59" value="0">
-            </div>
-            <div class="flex-column">
-                <button id="startButton">Start</button>
-            </div>
-            <div class="flex-column">
-                <button id="audioStopButton">Stop Audio</button>
-            </div>
-        </div>
-        <div class="text-center card">
-            <p style="margin-top: 0; margin-bottom: 5px; color: #707070">Elapsed</p>
-            <span class="clock-text" id="hourText">-</span>
-            <span class="clock-text">:</span>
-            <span class="clock-text" id="minuteText">-</span>
-            <span class="clock-text">:</span>
-            <span class="clock-text" id="secondText">-</span>
-        </div>
-        <p id="infoText" class="text-center info-text"></p>
+    <h1>Timer</h1>
+    Hour: <input id="hourInput" type="number" min="0" value="0"><br>
+    Minute: <input id="minuteInput" type="number" min="0" value="0"><br>
+    Second: <input id="secondInput" type="number" min="0" value="0"><br>
+    <br>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn" disabled>Stop</button>
+    <button id="resetBtn">Reset</button>
+    <br>
+    <br>
+    <div id="timer">
+        <span id="hourText">00</span>
+        :
+        <span id="minuteText">00</span>
+        :
+        <span id="secondText">00</span>
     </div>
-
     <script>
-        // Prevent user from closing the tab, 
-        // User need to interact with the webpage to make it works.
         window.addEventListener('beforeunload', function(e) {
             e.preventDefault();
             e.returnValue = '';
         });
 
-        var startButton = document.getElementById('startButton');
-        var audio = new Audio('audio/alarm.wav');
-        audio.volume = 0.1;
-        var audioStopButton = document.getElementById('audioStopButton');
-        var started = false;
-
-        function startTimer() {
-            var trackInMinutes = 0;
-            var second = 0;
-            var minute = 0;
-            var hour = 0;
+        (function(window, document) {
             var hourInput = document.getElementById('hourInput');
             var minuteInput = document.getElementById('minuteInput');
-            var durationInMinutes = (parseInt(hourInput.value) * 60) + parseInt(minuteInput.value);
-            console.log(durationInMinutes + ' minutes');
-            var secondText = document.getElementById('secondText');
-            var minuteText = document.getElementById('minuteText');
-            var hourText = document.getElementById('hourText');
-            var infoText = document.getElementById('infoText');
+            var secondInput = document.getElementById('secondInput');
 
-            if (durationInMinutes === 0) {
-                alert('Duration cannot be 0.');
-                hourInput.focus();
-                return;
+            var startBtn = document.getElementById('startBtn');
+            var stopBtn = document.getElementById('stopBtn');
+            var resetBtn = document.getElementById('resetBtn');
+
+            var hourText = document.getElementById('hourText');
+            var minuteText = document.getElementById('minuteText');
+            var secondText = document.getElementById('secondText');
+
+            var durationInSecond = 0;
+
+            var hour = 0;
+            var minute = 0;
+            var second = 0;
+
+            var _interval;
+
+            var running = false;
+            var paused = false;
+
+            var alarm = new Audio('audio/alarm.wav');
+            alarm.volume = 0.1;
+
+            function changeBtnState() {
+                if (running) {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                } else {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
             }
 
-            started = true;
+            function resetTimer() {
+                hour = 0;
+                minute = 0;
+                second = 0;
+                running = false;
+                paused = false;
+                updateTimerText();
+                clearInterval(_interval);
+                changeBtnState();
+            }
 
-            var info = 'Alarm set for ' + hourInput.value + ' hour(s) and ' 
-                        + minuteInput.value + ' minute(s).';
-            infoText.innerHTML = info;
+            function pauseTimer() {
+                running = false;
+                paused = true;
+                clearInterval(_interval);
+                changeBtnState();
+            }
 
-            var _interval = setInterval(function() {
-                if (trackInMinutes === durationInMinutes) {
-                    clearInterval(_interval);
-                    info = 'Finish Learning.<br>Duration: ' 
-                            + hourInput.value  
-                            + " hour(s), " 
-                            + minuteInput.value
-                            + ' minute(s).';
-                    infoText.innerHTML = info
-                    audio.play();
-                    audioStopButton.style.display = 'inline-block';
-                    setTimeout(function() {
-                        audioStopButton.style.display = 'none';
-                    }, 12000);
-                    started = false;
-                    startButton.disabled = false;
-                    return;
+            function tick() {
+                if (second === 0) {
+                    if (minute > 0) {
+                        second = 60;
+                        minute--;
+                    }
                 }
-                if (second === 60) {
-                    second = 0;
-                    minute += 1;
-                    trackInMinutes += 1;
+                if (minute === 0) {
+                    if (hour > 0 ) {
+                        minute = 60;
+                        hour--;
+                    }
                 }
-                if (minute === 60) {
-                    minute = 0;
-                    hour += 1;
-                }
-                secondText.innerHTML = second > 9 ? second : '0' + second;
-                minuteText.innerHTML = minute > 9 ? minute : '0' + minute;
+                second--;
+                durationInSecond--;
+            }
+
+            function runTimer() {
+                _interval = setInterval(function() {
+                    console.log(hour, minute, second, durationInSecond, "paused:" + paused);
+                    updateTimerText();
+                    if (durationInSecond <= 0) {
+                        console.log('terminated');
+                        resetTimer();
+                        alarm.play();
+                        return;
+                    }
+                    tick();
+                }, 1000);
+            }
+
+            function startTimer() {
+                hour = hourInput.value ? parseInt(hourInput.value) : 0;
+                minute = minuteInput.value ? parseInt(minuteInput.value) : 0;
+                second = secondInput.value ? parseInt(secondInput.value) : 0;
+                durationInSecond = (hour * 3600) + (minute * 60) + second;
+
+                if (durationInSecond <= 0) return alert('Duration 0');
+
+                running = true;
+                paused = false;
+                updateTimerText();
+                tick();
+                runTimer();
+                changeBtnState();
+            }
+
+            function resumeTimer() {
+                running = true;
+                paused = false;
+                runTimer();
+                changeBtnState();
+            }
+
+            function updateTimerText() {
                 hourText.innerHTML = hour > 9 ? hour : '0' + hour;
-                second += 1;
-            }, 1000);
-        }
+                minuteText.innerHTML = minute > 9 ? minute : '0' + minute;
+                secondText.innerHTML = second > 9 ? second : '0' + second;
+            }
 
-        startButton.addEventListener('click', function (e) {
-            startTimer();
-            if (started) startButton.disabled = true;
-        });
-        audioStopButton.addEventListener('click', function (e) {
-            audio.pause();
-            audioStopButton.style.display = 'none';
-        })
+            startBtn.addEventListener('click', function(e) {
+                if (paused) {
+                    resumeTimer();
+                } else {
+                    startTimer();
+                }
+                changeBtnState();
+            });
+            stopBtn.addEventListener('click', function(e) {
+                pauseTimer();
+                changeBtnState();
+            });
+            resetBtn.addEventListener('click', function(e) {
+                running = false;
+                resetTimer();
+                changeBtnState();
+                alarm.pause();
+            });
 
+        })(window, document);
     </script>
 </body>
 </html>
