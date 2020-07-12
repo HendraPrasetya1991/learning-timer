@@ -2,23 +2,135 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Demo</title>
+    <title>Demo Timer</title>
 </head>
 <body>
-    <button id="play">Play</button>
-    <button id="stop">Stop</button>
+    Hour: <input id="hourInput" type="number" min="0" value="0"><br>
+    Minute: <input id="minuteInput" type="number" min="0" value="0"><br>
+    Second: <input id="secondInput" type="number" min="0" value="0"><br>
+    <button id="startBtn">Start</button>
+    <button id="stopBtn" disabled>Stop</button>
+    <button id="resetBtn">Reset</button>
+
+    <div id="timer">
+        <span id="hourText">HH</span>
+        :
+        <span id="minuteText">MM</span>
+        :
+        <span id="secondText">SS</span>
+    </div>
     <script>
-        var aud = new Audio('audio/alarm.wav');
-        aud.volume = 0.2;
-        aud.loop= true;
-        var playButton = document.getElementById('play');
-        var stopButton = document.getElementById('stop');
-        playButton.addEventListener('click', function(e) {
-            aud.play();
-        });
-        stopButton.addEventListener('click', function (e) {
-            aud.pause();
-        });
+        (function(window, document) {
+            var hourInput = document.getElementById('hourInput');
+            var minuteInput = document.getElementById('minuteInput');
+            var secondInput = document.getElementById('secondInput');
+
+            var startBtn = document.getElementById('startBtn');
+            var stopBtn = document.getElementById('stopBtn');
+            var resetBtn = document.getElementById('resetBtn');
+
+            var hourText = document.getElementById('hourText');
+            var minuteText = document.getElementById('minuteText');
+            var secondText = document.getElementById('secondText');
+
+            // var durationInSecond;
+
+            var hour = 0;
+            var minute = 0;
+            var second = 0;
+
+            var _interval;
+
+            var started = false;
+
+            function changeBtnState() {
+                if (started) {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                } else {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            }
+
+            function resetTimer() {
+                hour = 0;
+                minute = 0;
+                second = 0;
+                clearInterval(_interval);
+            }
+
+            function pauseTimer() {
+                started = false;
+                clearInterval(_interval);
+            }
+
+            function runTimer() {
+                _interval = setInterval(function() {
+                    console.log(hour, minute, second);
+                    if (second === 0) {
+                        second = 60;
+                        minute--;
+                    }
+                    if (minute === 0) {
+                        minute = 60;
+                        hour--;
+                    }
+                    if (hour = 0 && minute === 0 && second  0) {
+                        console.log('terminated');
+                    }
+                    updateTimerText();
+                    second--;
+                }, 1000);
+            }
+
+            function startTimer() {
+                hour = parseInt(hourInput.value);
+                minute = parseInt(minuteInput.value);
+                second = parseInt(secondInput.value);
+                started = true;
+                runTimer();
+            }
+
+            function resumeTimer() {
+                started = true;
+                runTimer();
+            }
+
+            function updateTimerText() {
+                hourText.innerHTML = hour;
+                minuteText.innerHTML = minute;
+                secondText.innerHTML = second;
+            }
+
+            // not used currently
+            function calcDuration() {
+                var hour = parseInt(hourInput.value);
+                var minute = parseInt(minuteInput.value);
+                var second = parseInt(secondInput.value);
+                var durationInSecond = (hour * 3600) + (minute * 60) + second;
+                return durationInSecond;
+            }
+
+            startBtn.addEventListener('click', function(e) {
+                if (started) {
+                    resumeTimer();
+                } else {
+                    startTimer();
+                }
+                changeBtnState();
+            });
+            stopBtn.addEventListener('click', function(e) {
+                pauseTimer();
+                changeBtnState();
+            });
+            resetBtn.addEventListener('click', function(e) {
+                started = false;
+                resetTimer();
+                changeBtnState();
+            });
+
+        })(window, document);
     </script>
 </body>
 </html>
