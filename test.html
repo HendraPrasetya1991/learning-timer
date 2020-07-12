@@ -1,168 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Demo Timer</title>
-    <style>
-        #timer {
-            font-size: 30px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Timer</h1>
-    Hour: <input id="hourInput" type="number" min="0" value="0"><br>
-    Minute: <input id="minuteInput" type="number" min="0" value="0"><br>
-    Second: <input id="secondInput" type="number" min="0" value="0"><br>
-    <br>
-    <button id="startBtn">Start</button>
-    <button id="stopBtn" disabled>Stop</button>
-    <button id="resetBtn">Reset</button>
-    <br>
-    <br>
-    <div id="timer">
-        <span id="hourText">HH</span>
-        :
-        <span id="minuteText">MM</span>
-        :
-        <span id="secondText">SS</span>
-    </div>
-    <script>
-        (function(window, document) {
-            var hourInput = document.getElementById('hourInput');
-            var minuteInput = document.getElementById('minuteInput');
-            var secondInput = document.getElementById('secondInput');
+<!DOCTYPE HTML> 
+<html> 
+<head> 
+<style> 
+body{ 
+    text-align: center; 
+    background: #00ECB9; 
+font-family: sans-serif; 
+font-weight: 100; 
+} 
+h1{ 
+color: #396; 
+font-weight: 100; 
+font-size: 40px; 
+margin: 40px 0px 20px; 
+} 
+#clockdiv{ 
+    font-family: sans-serif; 
+    color: #fff; 
+    display: inline-block; 
+    font-weight: 100; 
+    text-align: center; 
+    font-size: 30px; 
+} 
+#clockdiv > div{ 
+    padding: 10px; 
+    border-radius: 3px; 
+    background: #00BF96; 
+    display: inline-block; 
+} 
+#clockdiv div > span{ 
+    padding: 15px; 
+    border-radius: 3px; 
+    background: #00816A; 
+    display: inline-block; 
+} 
+smalltext{ 
+    padding-top: 5px; 
+    font-size: 16px; 
+} 
+</style> 
+</head> 
+<body> 
+<h1>Countdown Clock</h1> 
+<div id="clockdiv"> 
+<div> 
+    <span class="days" id="day"></span> 
+    <div class="smalltext">Days</div> 
+</div> 
+<div> 
+    <span class="hours" id="hour"></span> 
+    <div class="smalltext">Hours</div> 
+</div> 
+<div> 
+    <span class="minutes" id="minute"></span> 
+    <div class="smalltext">Minutes</div> 
+</div> 
+<div> 
+    <span class="seconds" id="second"></span> 
+    <div class="smalltext">Seconds</div> 
+</div> 
+</div> 
 
-            var startBtn = document.getElementById('startBtn');
-            var stopBtn = document.getElementById('stopBtn');
-            var resetBtn = document.getElementById('resetBtn');
+<p id="demo"></p> 
 
-            var hourText = document.getElementById('hourText');
-            var minuteText = document.getElementById('minuteText');
-            var secondText = document.getElementById('secondText');
+<script> 
 
-            var durationInSecond = 0;
+var deadline = new Date("dec 31, 2017 15:37:25").getTime(); 
 
-            var hour = 0;
-            var minute = 0;
-            var second = 0;
+var x = setInterval(function() { 
 
-            var _interval;
-
-            var running = false;
-            var paused = false;
-
-            var alarm = new Audio('audio/alarm.wav');
-            alarm.volume = 0.1;
-
-            function changeBtnState() {
-                if (running) {
-                    startBtn.disabled = true;
-                    stopBtn.disabled = false;
-                } else {
-                    startBtn.disabled = false;
-                    stopBtn.disabled = true;
-                }
-            }
-
-            function resetTimer() {
-                hour = 0;
-                minute = 0;
-                second = 0;
-                running = false;
-                paused = false;
-                updateTimerText();
-                clearInterval(_interval);
-                changeBtnState();
-            }
-
-            function pauseTimer() {
-                running = false;
-                paused = true;
-                clearInterval(_interval);
-                changeBtnState();
-            }
-
-            function tick() {
-                if (second === 0) {
-                    if (minute > 0) {
-                        second = 60;
-                        minute--;
-                    }
-                }
-                if (minute === 0) {
-                    if (hour > 0 ) {
-                        minute = 60;
-                        hour--;
-                    }
-                }
-                second--;
-                durationInSecond--;
-            }
-
-            function runTimer() {
-                _interval = setInterval(function() {
-                    console.log(hour, minute, second, durationInSecond, "paused:" + paused);
-                    updateTimerText();
-                    if (durationInSecond <= 0) {
-                        console.log('terminated');
-                        resetTimer();
-                        alarm.play();
-                        return;
-                    }
-                    tick();
-                }, 1000);
-            }
-
-            function startTimer() {
-                hour = hourInput.value ? parseInt(hourInput.value) : 0;
-                minute = minuteInput.value ? parseInt(minuteInput.value) : 0;
-                second = secondInput.value ? parseInt(secondInput.value) : 0;
-                durationInSecond = (hour * 3600) + (minute * 60) + second;
-
-                if (durationInSecond <= 0) return alert('Duration 0');
-
-                running = true;
-                paused = false;
-                updateTimerText();
-                tick();
-                runTimer();
-                changeBtnState();
-            }
-
-            function resumeTimer() {
-                running = true;
-                paused = false;
-                runTimer();
-                changeBtnState();
-            }
-
-            function updateTimerText() {
-                hourText.innerHTML = hour > 9 ? hour : '0' + hour;
-                minuteText.innerHTML = minute > 9 ? minute : '0' + minute;
-                secondText.innerHTML = second > 9 ? second : '0' + second;
-            }
-
-            startBtn.addEventListener('click', function(e) {
-                if (paused) {
-                    resumeTimer();
-                } else {
-                    startTimer();
-                }
-                changeBtnState();
-            });
-            stopBtn.addEventListener('click', function(e) {
-                pauseTimer();
-                changeBtnState();
-            });
-            resetBtn.addEventListener('click', function(e) {
-                running = false;
-                resetTimer();
-                changeBtnState();
-                alarm.pause();
-            });
-
-        })(window, document);
-    </script>
-</body>
-</html>
+var now = new Date().getTime(); 
+var t = deadline - now; 
+var days = Math.floor(t / (1000 * 60 * 60 * 24)); 
+var hours = Math.floor((t%(1000 * 60 * 60 * 24))/(1000 * 60 * 60)); 
+var minutes = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60)); 
+var seconds = Math.floor((t % (1000 * 60)) / 1000); 
+document.getElementById("day").innerHTML =days ; 
+document.getElementById("hour").innerHTML =hours; 
+document.getElementById("minute").innerHTML = minutes; 
+document.getElementById("second").innerHTML =seconds; 
+if (t < 0) { 
+        clearInterval(x); 
+        document.getElementById("demo").innerHTML = "TIME UP"; 
+        document.getElementById("day").innerHTML ='0'; 
+        document.getElementById("hour").innerHTML ='0'; 
+        document.getElementById("minute").innerHTML ='0' ; 
+        document.getElementById("second").innerHTML = '0'; } 
+}, 1000); 
+</script> 
+</body> 
+</html> 

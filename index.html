@@ -13,8 +13,8 @@
 <body>
     <h1>Timer</h1>
     Hour: <input id="hourInput" type="number" min="0" value="0"><br>
-    Minute: <input id="minuteInput" type="number" min="0" value="0"><br>
-    Second: <input id="secondInput" type="number" min="0" value="0"><br>
+    Minute: <input id="minuteInput" type="number" min="0" max="59" value="0"><br>
+    Second: <input id="secondInput" type="number" min="0" max="59" value="0"><br>
     <br>
     <button id="startBtn">Start</button>
     <button id="stopBtn" disabled>Stop</button>
@@ -91,16 +91,14 @@
 
             function tick() {
                 if (second === 0) {
-                    if (minute > 0) {
-                        second = 60;
-                        minute--;
+                    if (minute ===0) {
+                        if (hour > 0) {
+                            minute = 60;
+                            hour--;
+                        }
                     }
-                }
-                if (minute === 0) {
-                    if (hour > 0 ) {
-                        minute = 60;
-                        hour--;
-                    }
+                    second = 60;
+                    minute--;
                 }
                 second--;
                 durationInSecond--;
@@ -108,14 +106,14 @@
 
             function runTimer() {
                 _interval = setInterval(function() {
-                    console.log(hour, minute, second, durationInSecond, "paused:" + paused);
-                    updateTimerText();
+                    console.log(hour, minute, second, durationInSecond);
                     if (durationInSecond <= 0) {
                         console.log('terminated');
                         resetTimer();
                         alarm.play();
                         return;
                     }
+                    updateTimerText();
                     tick();
                 }, 1000);
             }
