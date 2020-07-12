@@ -79,6 +79,7 @@
                 hour = 0;
                 minute = 0;
                 second = 0;
+                durationInSecond = 0;
                 running = false;
                 paused = false;
                 updateTimerText();
@@ -164,7 +165,6 @@
                 changeBtnState();
             });
             resetBtn.addEventListener('click', function(e) {
-                running = false;
                 resetTimer();
                 changeBtnState();
                 alarm.pause();
