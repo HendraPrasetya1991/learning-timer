@@ -12,9 +12,9 @@
 </head>
 <body>
     <h1>Timer</h1>
-    Hour: <input id="hourInput" type="number" min="0" max="23" value="0"><br>
-    Minute: <input id="minuteInput" type="number" min="0" max="59" value="0"><br>
-    Second: <input id="secondInput" type="number" min="0" max="59" value="0"><br>
+    Hour: <input id="hourInput" type="number" min="0" max="23" value="0"><button id="resetHourBtn">X</button><br>
+    Minute: <input id="minuteInput" type="number" min="0" max="59" value="0"><button id="resetMinuteBtn">X</button><br>
+    Second: <input id="secondInput" type="number" min="0" max="59" value="0"><button id="resetSecondBtn">X</button><br>
     <br>
     <button id="startBtn">Start</button>
     <button id="stopBtn" disabled>Stop</button>
@@ -46,6 +46,10 @@
             var hourText = document.getElementById('hourText');
             var minuteText = document.getElementById('minuteText');
             var secondText = document.getElementById('secondText');
+
+            var resetHourBtn = document.getElementById('resetHourBtn');
+            var resetMinuteBtn = document.getElementById('resetMinuteBtn');
+            var resetSecondBtn = document.getElementById('resetSecondBtn');
 
             var durationInSecond = 0;
 
@@ -164,6 +168,15 @@
                 resetTimer();
                 changeBtnState();
                 alarm.pause();
+            });
+            resetHourBtn.addEventListener('click', function(e) {
+                hourInput.value = 0;
+            });
+            resetMinuteBtn.addEventListener('click', function(e) {
+                minuteInput.value = 0;
+            });
+            resetSecondBtn.addEventListener('click', function(e) {
+                secondInput.value = 0;
             });
 
         })(window, document);
