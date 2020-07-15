@@ -19,10 +19,16 @@
             flex-direction: row;
         }
         #content {
-            width: 400px;
+            width: 350px;
         }
         .mr-4 {
             margin-right: 4px;
+        }
+        fieldset {
+            border-radius: 4px;
+        }
+        #pomodoro label {
+            user-select: none;
         }
     </style>
 </head>
@@ -47,7 +53,7 @@
             </div>
         </div>
         <br>
-        <fieldset>
+        <fieldset id="pomodoro">
             <legend>Pomodoro (in minutes)</legend>
             <label for="pomo-work">
                 <input id="pomo-work" type="radio" name="pomo">25 (working)
@@ -232,16 +238,19 @@
                 hourInput.value = 0;
                 minuteInput.value = 25;
                 secondInput.value = 0;
+                resetTimer();
             });
             pomoBreak.addEventListener('change', function(e) {
                 hourInput.value = 0;
                 minuteInput.value = 5;
                 secondInput.value = 0;
+                resetTimer();
             });
             pomoLongbreak.addEventListener('change', function(e) {
                 hourInput.value = 0;
                 minuteInput.value = 15;
                 secondInput.value = 0;
+                resetTimer();
             });
 
         })(window, document);
